@@ -1,0 +1,8 @@
+<odoo>
+        <menuitem id="menu_product_reorder_rule"
+              name="Product Reorder rule"
+              parent="stock.menu_stock_root"
+              action="action_product_reorder_rule"
+              sequence="4"/>
+
+</odoo>

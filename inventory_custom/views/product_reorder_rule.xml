@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Product reorder rule tree view -->
+    <record id="product_reorder_rule_tree" model="ir.ui.view">
+        <field name="name">product.reorder.rule.tree</field>
+        <field name="model">product.reorder.rule</field>
+        <field name="arch" type="xml">
+            <tree string="Product Reorder Rule">
+                <field name="product_id"/>
+                <field name="minimum_stock"/>
+                <field name="reorder_quantity"/>
+                <field name="lead_time"/>
+                <field name="partner_id"/>
+            </tree>
+        </field>
+    </record>
+
+
+    <!-- Product reorder rule form view -->
+    <record id="product_reorder_rule_form" model="ir.ui.view">
+        <field name="name">product.reorder.rule.form</field>
+        <field name="model">product.reorder.rule</field>
+        <field name="arch" type="xml">
+            <form string="Product Reorder Rule">
+                <sheet>
+                    <group>
+                        <field name="product_id"/>
+                        <field name="minimum_stock"/>
+                        <field name="reorder_quantity"/>
+                        <field name="lead_time"/>
+                        <field name="partner_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_product_reorder_rule" model="ir.actions.act_window">
+        <field name="name">Product Reorder Rule</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">product.reorder.rule</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+    </record>
+
+
+    <record id="view_stock_picking_form_extension" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form/sheet/notebook/page[@name='other_info']" position="after">
+                <!-- Add a new tab for approval -->
+                <page string="Approval" attrs="{'invisible': [('state', '!=', 'pending_approval')]}">
+                    <group>
+                        <!-- Add fields for approval -->
+                        <field name="state" invisible="1"/>
+                        <!-- Add buttons for approval -->
+                        <button name="action_approve_order" string="Approve Order" type="object" class="btn-primary"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
