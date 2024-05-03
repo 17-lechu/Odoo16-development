@@ -6,12 +6,17 @@
     'summary': 'Inventory Management',
     'complexity': 'User Friendly',
     'description': """
-            This module provide .....
+            This module provides that automatically generate the replenishment orders based on lead time and the
+             supplier.
     """,
     'author': 'Lekshmi G S',
     'website': '',
-    'depends': ['base', 'stock'],
+    'depends': ['base', 'stock', 'purchase'],
     'data': [
+        'data/data.xml',
+        'security/ir.model.access.csv',
+        'views/product_reorder_rule.xml',
+        'menu/menu.xml'
     ],
 
     'installable': True,

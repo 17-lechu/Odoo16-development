@@ -9,9 +9,9 @@
             <tree string="Product Reorder Rule">
                 <field name="product_id"/>
                 <field name="minimum_stock"/>
+                <field name="maximum_stock"/>
                 <field name="reorder_quantity"/>
                 <field name="lead_time"/>
-                <field name="partner_id"/>
             </tree>
         </field>
     </record>
@@ -27,9 +27,9 @@
                     <group>
                         <field name="product_id"/>
                         <field name="minimum_stock"/>
+                        <field name="maximum_stock"/>
                         <field name="reorder_quantity"/>
                         <field name="lead_time"/>
-                        <field name="partner_id"/>
                     </group>
                 </sheet>
             </form>
@@ -46,21 +46,17 @@
     </record>
 
 
-    <record id="view_stock_picking_form_extension" model="ir.ui.view">
-        <field name="name">stock.picking.form.inherit</field>
-        <field name="model">stock.picking</field>
-        <field name="inherit_id" ref="stock.view_picking_form"/>
+    <record id="purchase_order_form_inherit" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//form/sheet/notebook/page[@name='other_info']" position="after">
-                <!-- Add a new tab for approval -->
-                <page string="Approval" attrs="{'invisible': [('state', '!=', 'pending_approval')]}">
-                    <group>
-                        <!-- Add fields for approval -->
-                        <field name="state" invisible="1"/>
-                        <!-- Add buttons for approval -->
-                        <button name="action_approve_order" string="Approve Order" type="object" class="btn-primary"/>
-                    </group>
-                </page>
+            <xpath expr="//field[@name='state']" position="attributes">
+                <attribute name="statusbar_visible">draft,sent,approved,purchase</attribute>
+            </xpath>
+
+            <xpath expr="//button[@name='button_confirm']" position="before">
+                <button name="action_approve_order" string="Approve Order" type="object" states="sent" class="btn-primary"/>
             </xpath>
         </field>
     </record>

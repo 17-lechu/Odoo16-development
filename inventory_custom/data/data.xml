@@ -1,0 +1,13 @@
+<odoo>
+    <record id="generate_replenishment_order" model="ir.cron">
+        <field name="name">Generate Replenishment Orders</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="doall">1</field>
+        <field name="model_id" ref="model_product_reorder_rule"/>
+        <field name="state">code</field>
+        <field name="code">model.check_stock_levels()</field>
+    </record>
+
+</odoo>

@@ -7,45 +7,39 @@ class ProductReorderRule(models.Model):
     name = fields.Char(string='Name')
     product_id = fields.Many2one('product.product', string='Product', required=True)
     minimum_stock = fields.Float(string='Minimum Stock')
+    maximum_stock = fields.Float(string='Maximum Stock')
     reorder_quantity = fields.Float(string='Reorder Quantity')
     lead_time = fields.Integer(string='Lead Time (Days)')
-    partner_id = fields.Many2one('res.partner', string='Supplier')
 
     def check_stock_levels(self):
-        products_to_replenish = self.env['product.product']
         for rule in self.env['product.reorder.rule'].search([]):
             if rule.product_id.qty_available < rule.minimum_stock:
-                products_to_replenish += rule.product_id
+                self.generate_replenishment_orders(rule)
 
-        if products_to_replenish:
-            self.generate_replenishment_orders(products_to_replenish)
-
-    def generate_replenishment_orders(self, products):
-        order_vals = []
-        for product in products:
-            rule = self.env['product.reorder.rule'].search([('product_id', '=', product.id)], limit=1)
-            order_vals.append({
-                'product_id': product.id,
-                'product_qty': rule.reorder_quantity,
-                'partner_id': rule.supplier_id.id,
-                'picking_type_id': 1,  # Replace with the appropriate picking type ID
-                'date_planned': fields.Datetime.now() + timedelta(days=rule.lead_time),
-            })
-        order = self.env['stock.picking'].create({
-            'picking_type_id': 1,  # Replace with the appropriate picking type ID
-            'partner_id': 1,  # Replace with the appropriate partner ID
-            'move_lines': [(0, 0, line) for line in order_vals],
-            'state': 'pending_approval',
-        })
-        order.action_approve_order()
+    def generate_replenishment_orders(self, rule):
+        if rule.product_id.seller_ids:
+            for line in rule.product_id.seller_ids:
+                if rule.lead_time <= line.delay:
+                    replenishment = self.env['stock.warehouse.orderpoint'].create({
+                        'product_id': rule.product_id.id,
+                        'product_min_qty': rule.minimum_stock,
+                        'product_max_qty': rule.maximum_stock,
+                    })
+                    replenishment.action_replenish()
 
 
-class StockPickingInherit(models.Model):
-    _inherit = 'stock.picking'
+class PurchaseOrderInherit(models.Model):
+    _inherit = 'purchase.order'
 
-    state = fields.Selection(selection_add=[('pending_approval', 'Pending Approval')])
+    state = fields.Selection([
+        ('draft', 'RFQ'),
+        ('sent', 'RFQ Sent'),
+        ('to approve', 'To Approve'),
+        ('approved', 'Approved'),
+        ('purchase', 'Purchase Order'),
+        ('done', 'Locked'),
+        ('cancel', 'Cancelled')
+    ], string='Status', readonly=True, index=True, copy=False, default='draft', tracking=True)
 
     def action_approve_order(self):
-        self.write({'state': 'confirmed'})
-
-
+        self.write({'state': 'approved'})
